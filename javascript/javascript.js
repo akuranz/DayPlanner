@@ -3,207 +3,100 @@ $(document).ready(function() {
   console.log(moment());
   $("#currentDay").html(moment().format("LL"));
 
+  //pulls agenda from local storage and uses initializeAgenda() function so nothing is null
   var agenda = JSON.parse(localStorage.getItem("agenda")) || initializeAgenda();
   console.log(agenda);
 
+  //for loop for objects, key could be anything like i and agenda is the object
   for (var key in agenda) {
-    console.log(key, agenda[key]);
+    //create table row
     var tr = $("<tr>");
+    //create table cell save in tdTime with classes hour and row and pass .text key
     var tdTime = $("<td>")
       .addClass("hour")
       .text(key);
-    var tdEvent = $("<td>");
 
+    //create table cell and save in tdEvent
+    var tdEvent = $("<td>");
+    //declare variable time
     var time;
+
     if (moment(key, "h a").isSame(moment(), "hour")) {
       time = "present";
+      //else if the key in the 12 hour format and am/pm is the same as the hour right now,
+      //set the time variable to future
     } else if (moment(key, "h a").isAfter(moment())) {
       time = "future";
+      //else //if the key in the 12 hour format and am/pm is the same as the hour right now,
+      //set the time variable to past
     } else if (moment(key, "h a").isBefore(moment())) {
       time = "past";
     }
 
+    //create text element with class description,
+    //the string held in the variable time,
+    //set the data-time attribute to the key in the initializeAgenda funciton,
+    //and get the value of the key in the agenda object as it loops throug
     var eventText = $("<textarea>")
       .addClass("description")
       .addClass(time)
       .attr("data-time", key)
       .val(agenda[key]);
+    //append the text area eventTExt to the table cell tdEvent
     tdEvent.append(eventText);
+
+    //create a table cell with class saveBtn
     var tdSubmit = $("<td>").addClass("saveBtn");
-    var icon = $("<i>").addClass("fas fa save");
+    //create a font awesome icon and set class to fas fa-save to display a save icon
+    var icon = $("<i>").attr("class", "fas fa-save");
+    //append the icon to the tsSubmit table cell
     tdSubmit.append(icon);
+
+    //append the tdTime, tdEvent, and tdSubmit cells to the table row
     tr.append(tdTime, tdEvent, tdSubmit);
+    //append the table row to the table body
     $("#myAgenda").append(tr);
   }
 
+  //create a function Initialize Agenda to run a for loop and
+  //create an object that holds times 9am - 5pm to prevent nothing showing up in the planner is null
   function initializeAgenda() {
+    //declare a variable tempAgenda as an empty object
     var tempAgenda = {};
 
+    //create a for loop starting at 9 bc that is the first hour in the day planner
+    //set length to 18 so it increments 8 times
     for (var i = 9; i < 18; i++) {
-      // tempAgenda.moment(i, "H").format("h a") = "";
+      //tempAgenda.moment(i, "H").format("h a") = ""; <--won't work for objects
+      //creates an array in the tempAgenda object of times
       tempAgenda[moment(i, "H").format("h a")] = "";
     }
 
+    //returns the array
     return tempAgenda;
   }
 
+  //when any element with class saveBtn is clicked, a function runs
   $(".saveBtn").on("click", function() {
+    //variable time for this class move up one node,
     var time = $(this)
       .parent()
+      //find descrition class in a sister and then child node in the textarea
       .find(".description")
+      //gets the data-time attribute that we set from the object for loop
       .attr("data-time");
     var text = $(this)
+      //variable text for this class move up one node,
       .parent()
+      //find descrition class in a sister and then child node in the textarea
       .find(".description")
+      //gets the value of the text area in the row that the button was clicked
       .val();
     console.log(time, text);
 
+    //setting the key of time to the the text --> time: text
     agenda[time] = text;
-
+    //create a an object for agenda to hold times and text
     localStorage.setItem("agenda", JSON.stringify(agenda));
   });
 });
-
-// var data = {
-//   name: "Ben"
-// };
-
-// console.log(data.name);
-// data.age = 31;
-// data["job"] = "tutor";
-// console.log(data["name"]);
-// console.log(data);
-
-//calls moment and the current date for top of calendar
-
-//loop through businessHours array to append new rows for each hour
-// for (var i = 0; i < businessHours.length; i++) {
-//   var time = businessHours[i];
-//   $("#timeblock-table tbody").append(
-//     "<tr class='hour parent-row'><td class=" +
-//       `${time}` +
-//       ">" +
-//       time +
-//       "</td><td><textarea class='description'></textarea></td><td class='saveBtn' " +
-//       `id=${time}` +
-//       "'>" +
-//       "<i></i></td></tr>"
-//   );
-//   $("i").attr("class", "fas fa-save pt-3");
-//   // $("textarea").attr("id", time);
-//   // addClass("class", "" + businessHours[i] + "");
-//   // $.each(businessHours, function(index, value) {
-//   //   $("textarea").attr("id", value);
-//   //   console.log(value);
-//   // });
-// }
-// $(businessHours).each(function(index) {
-//   $("textarea").attr("id", index[0]);
-// });
-
-// var appointment = localStorage.getItem("appointment");
-// $("#7AM").text(appointment);
-
-//Tried adding value to local storage with .this
-// $("#text").on("click", function() {
-//   $("#newInfo").each(function() {
-//     var id = $(this).attr("id");
-//     var value = $(this).val();
-//     localStorage.setItem(id, value);
-//   });
-// });
-
-// $("#test-parent").on("click", function() {
-//   $(".description").each(function() {
-//     var id = $(this).attr("id");
-//     var value = localStorage.getItem(id);
-
-//     $(this).val(value);
-//   });
-// });
-
-// var appointment = localStorage.getItem("appointment");
-// $("#8AM").text(appointment);
-
-// $(".saveBtn").on("click", function() {
-//   console.log("hello!");
-//   console.log(event.target.previousSibling);
-//   event.preventDefault();
-//   var appointmentInput = $("#8AM").val();
-//   localStorage.setItem("appointment", appointmentInput);
-// });
-
-// var appointment = localStorage.getItem("appointment");
-// $(event.target.previousSibling).text(appointment);
-// $(".saveBtn").on("click", function() {
-//   console.log("hello!");
-//   console.log(event.target.parentElement.children);
-//   console.log(event.target.previousSibling);
-//   event.preventDefault();
-//   var appointmentInput = $(event.target.previousSibling).val();
-//   localStorage.setItem("appointment", appointmentInput);
-// });
-
-// var appointment = localStorage.getItem("appointment");
-// $("#newInfo").text(appointment);
-
-// $(".saveBtn").on("click", function() {
-//   console.log("hello!");
-//   event.preventDefault();
-//   var appointmentInput = $("#newInfo").val();
-//   localStorage.setItem("appointment", appointmentInput);
-// });
-
-//   for (var i = 0; i < businessHours.length; i++) {
-//     $("#timeblock-table tbody").append(
-//       '<tr scope="row" class="row"><td>' + businessHours[i] + "</td></tr>"
-//     );
-//   }
-
-//   $("#timeblock-table tr").append("<td><textarea></textarea></td>");
-
-//   $("#timeblock-table tr").append("<td ><i class=''></i></td>");
-//   $("i").attr("class", "fas fa-save saveBtn pt-3");
-
-//   for (var i = 0; i < businessHours.length; i++) {
-//     $("#timeblock-table tbody")
-//       .find("tr")
-//       .each(function() {
-//         $(this)
-//           .find("td")
-//           .eq(0)
-//           .after("<td>hello</td>");
-//       });
-//   }
-
-//   for (var i = 0; i < businessHours.length; i++) {
-//     $("#timeblock-table tbody").append(
-//       "<tr><td><textarea>hello</textarea></td></tr>"
-//     );
-//   }
-
-//   for (var i = 0; i < businessHours.length; i++) {
-//     $("#timeblock-table tbody").append(
-//       '<tr><td class="saveBtn"><i></i></td></tr>'
-//     );
-//     $("i").attr("class", "fas fa-save pt-3");
-//   }
-
-// //color coding past, present, future events
-// var time = "11:30 pm"; //doesn't recognize AM/PM right now
-// console.log(time);
-// var now = moment().format("hh:mm a");
-// console.log(now);
-
-// var future = moment("hh:mm a").isAfter("11:30 pm");
-// console.log(future);
-
-// if (now > time) {
-//   console.log("date is past");
-// } else {
-//   console.log("date is future");
-// }
-
-// var future = moment("9:00 PM").isSameOrAfter("9:00 AM", "h:mm A");
-
-// console.log(future);
